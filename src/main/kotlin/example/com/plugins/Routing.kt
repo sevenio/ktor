@@ -1,6 +1,6 @@
 package example.com.plugins
 
-import example.com.model.tasks
+import example.com.model.TaskRepository
 import example.com.model.tasksAsTable
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -35,6 +35,7 @@ fun Application.configureRouting() {
 //         http://0.0.0.0:9292/tasks
 
         get("/tasks") {
+            val tasks = TaskRepository.allTasks()
             call.respondText(
                 contentType = ContentType.parse("text/html"),
                 text = tasks.tasksAsTable()
