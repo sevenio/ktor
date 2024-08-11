@@ -1,5 +1,6 @@
 package example.com.plugins
 
+import example.com.model.Priority
 import example.com.model.TaskRepository
 import example.com.model.tasksAsTable
 import io.ktor.http.*
@@ -40,6 +41,31 @@ fun Application.configureRouting() {
                 contentType = ContentType.parse("text/html"),
                 text = tasks.tasksAsTable()
             )
+        }
+//          http://0.0.0.0:9292/tasks/byPriority/Medium
+        get("/tasks/byPriority/{priority}") {
+            val priorityAsText = call.parameters["priority"]
+            if (priorityAsText == null) {
+                call.respond(HttpStatusCode.BadRequest)
+                return@get
+            }
+
+            try {
+                val priority = Priority.valueOf(priorityAsText)
+                val tasks = TaskRepository.tasksByPriority(priority)
+
+                if (tasks.isEmpty()) {
+                    call.respond(HttpStatusCode.NotFound)
+                    return@get
+                }
+
+                call.respondText(
+                    contentType = ContentType.parse("text/html"),
+                    text = tasks.tasksAsTable()
+                )
+            } catch(ex: IllegalArgumentException) {
+                call.respond(HttpStatusCode.BadRequest)
+            }
         }
     }
 }
